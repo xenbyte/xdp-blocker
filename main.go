@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -14,7 +15,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var iface = flag.String("iface", "", "Interface to bind XDP program to")
+
 func main() {
+	flag.Parse()
+	if *iface == "" {
+		log.Fatal("-iface is required.")
+	}
 
 	// Load XDP Into App
 	bpf := goebpf.NewDefaultEbpfSystem()
@@ -38,7 +45,7 @@ func main() {
 	if err != nil {
 		fmt.Printf("xdp.Attach(): %v", err)
 	}
-	err = xdp.Attach("enp0s3")
+	err = xdp.Attach(*iface)
 	if err != nil {
 		log.Fatalf("Error attaching to Interface: %s", err)
 	}
